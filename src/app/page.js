@@ -49,7 +49,8 @@ const Home = () => {
 
     try {
       const drmConfig = {};
-
+      const supportsH265 = video?.canPlayType('video/mp4; codecs="hvc1.1.6.L93.90"') !== '';
+      console.log("supportsH265", supportsH265);
       // Modify DRM and player settings for Android devices
       if (isIOS || isChromeMac || isSafariMac) {
         video.muted = true;
@@ -57,6 +58,7 @@ const Home = () => {
         drmConfig["com.apple.fps"] = "https://c8eaeae1-drm-fairplay-licensing.axprod.net/AcquireLicense";
 
         player.configure({
+          preferredVideoCodecs: supportsH265 ? ['hvc1', 'avc1', 'vp9'] : ['avc1', 'vp9'],
           streaming: {
             useNativeHlsForFairPlay: true,
             bufferingGoal: 10,
@@ -84,6 +86,7 @@ const Home = () => {
 
         // For Android devices, use custom settings for better performance
         player.configure({
+          preferredVideoCodecs: supportsH265 ? ['hvc1', 'avc1', 'vp9'] : ['avc1', 'vp9'],
           streaming: {
             bufferingGoal: 10,
             bufferBehind: 10,
