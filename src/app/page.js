@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 
 const Home = () => {
   const [shakaPlayer, setShakaPlayer] = useState(null);
-  const [error, setError] = useState(null);
 
   const { userAgent } = navigator;
   const isIOS = (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) ||
@@ -11,6 +10,7 @@ const Home = () => {
   const isChromeMac = /Chrome/.test(userAgent) && /Mac/.test(userAgent);
   const isSafariMac = /Safari/.test(userAgent) && /Mac/.test(userAgent);
   const isAndroid = /Android/.test(userAgent);
+  const isAndroidTablet = /Android/.test(userAgent) && !/Mobile/.test(userAgent);
 
   const contentUrl = isIOS || isChromeMac || isSafariMac ?
     "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1647.m3u8" :
@@ -39,7 +39,6 @@ const Home = () => {
       initPlayer();
     } else {
       console.error('Browser not supported!');
-      setError("Browser not supported!");
     }
   }
 
@@ -53,46 +52,89 @@ const Home = () => {
 
     try {
       const drmConfig = {};
+      const supportsH265 = video?.canPlayType('video/mp4; codecs="hvc1.1.6.L93.90"') !== '';
+      console.log("supportsH265", supportsH265);
+      // Modify DRM and player settings for Android devices
       if (isIOS || isChromeMac || isSafariMac) {
         video.muted = true;
         video.autoPlay = true;
         drmConfig["com.apple.fps"] = "https://c8eaeae1-drm-fairplay-licensing.axprod.net/AcquireLicense";
 
-        // Add the advanced FairPlay DRM configuration (server certificate URI)
         player.configure({
+          preferredVideoCodecs: supportsH265 ? ['vp9', 'vp9', 'vp9'] : ['vp9', 'vp9'],
+          streaming: {
+            useNativeHlsForFairPlay: true,
+            bufferingGoal: 10,
+            bufferBehind: 10,
+            rebufferingGoal: 4,
+            lowLatencyMode: false,
+          },
+          abr: {
+            enabled: true,
+            switchInterval: 6,
+            bandwidthUpgradeTarget: 0.75,
+            bandwidthDowngradeTarget: 0.85,
+          },
           drm: {
+            servers: drmConfig,
             advanced: {
               "com.apple.fps": {
-                serverCertificateUri: "https://travelxp.akamaized.net/cert/fairplay/fairplay.cer", // FairPlay certificate URL
+                serverCertificateUri: "https://travelxp.akamaized.net/cert/fairplay/fairplay.cer",
               },
             },
           },
         });
       } else if (isAndroid) {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
+
+        // For Android devices, use custom settings for better performance
+        player.configure({
+          preferredVideoCodecs: supportsH265 ? ['vp9', 'vp9', 'vp9'] : ['vp9', 'vp9'],
+          streaming: {
+            bufferingGoal: 10,
+            bufferBehind: 10,
+            rebufferingGoal: 4,
+            lowLatencyMode: false,
+          },
+          abr: {
+            enabled: true,
+            switchInterval: 6,
+            bandwidthUpgradeTarget: 0.75,
+            bandwidthDowngradeTarget: 0.85,
+          },
+          drm: {
+            servers: drmConfig,
+            advanced: {
+              "com.widevine.alpha": {
+                videoRobustness: ["SW_SECURE_DECODE"], // Ensure software-based decoding
+                audioRobustness: ["SW_SECURE_CRYPTO"],
+              },
+            },
+          },
+        });
       } else {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
+
+        player.configure({
+          preferredVideoCodecs: supportsH265 ? ['vp9', 'vp9', 'vp9'] : ['vp9', 'vp9'],
+          streaming: {
+            bufferingGoal: 10,
+            bufferBehind: 10,
+            rebufferingGoal: 4,
+            lowLatencyMode: false,
+          },
+          abr: {
+            enabled: true,
+            switchInterval: 6,
+            bandwidthUpgradeTarget: 0.75,
+            bandwidthDowngradeTarget: 0.85,
+          },
+          drm: {
+            servers: drmConfig,
+          },
+        });
       }
 
-      player.configure({
-        streaming: {
-          bufferingGoal: 10,
-          bufferBehind: 10,
-          rebufferingGoal: 4,
-          lowLatencyMode: false,
-        },
-        abr: {
-          enabled: true,
-          switchInterval: 6,
-          bandwidthUpgradeTarget: 0.75,
-          bandwidthDowngradeTarget: 0.85,
-        },
-        drm: {
-          servers: drmConfig,
-        },
-      });
-
-      // Add the request filter to intercept and modify the DRM license request
       player.getNetworkingEngine().registerRequestFilter(function (type, request) {
         if (type === shakaPlayer.net.NetworkingEngine.RequestType.LICENSE) {
           request.headers['X-AxDRM-Message'] = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjQ1ODc2N2QtYTgzYi00MWQ0LWFlNjgtYWNhNzAwZDNkODRmIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImxpY2Vuc2UiOnsiZXhwaXJhdGlvbl9kYXRldGltZSI6IjIwMjUtMDMtMjlUMTE6MzA6MDcuNDAxWiIsImFsbG93X3BlcnNpc3RlbmNlIjp0cnVlLCJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImNvbnRlbnRfa2V5X3VzYWdlX3BvbGljaWVzIjpbeyJuYW1lIjoiUG9saWN5IEEiLCJ3aWRldmluZSI6eyJkZXZpY2Vfc2VjdXJpdHlfbGV2ZWwiOiJTV19TRUNVUkVfQ1JZUFRPIn19XSwiY29udGVudF9rZXlzX3NvdXJjZSI6eyJpbmxpbmUiOlt7ImlkIjoiMDJlM2FhNzg4M2IyOWI4OGEwZDM1ZTU4ODkyMDUxMDciLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9LHsiaWQiOiI3ZmUzMmY0MjZjMjE3MTliNTQxNTg5MWY2MjU2NzhkYSIsInVzYWdlX3BvbGljeSI6IlBvbGljeSBBIn0seyJpZCI6IjA4MmUxOWQzOTU5NmYwZWUzZDk5NzliOGQ0NjI2M2JiIiwidXNhZ2VfcG9saWN5IjoiUG9saWN5IEEifV19fSwiaWF0IjoxNzQzMTY1MDA3LCJleHAiOjE3NDMyNTE0MDd9.ekNJT6TwxTMYE5x4dHRvsv5sTdkelpmg-xqwfYxyfRI";
@@ -100,39 +142,10 @@ const Home = () => {
         }
       });
 
-      // Try loading content with hvc1 codec
-      await loadPlayerWithCodec(contentUrl, 'hvc1', player);
+      await player.load(contentUrl);
     } catch (error) {
       console.error("Error loading player:", error);
-      setError("Error loading player.");
     }
-  }
-
-  async function loadPlayerWithCodec(url, codec, player) {
-    try {
-      if (isCodecSupported(codec)) {
-        console.log(`Loading content with ${codec} codec`);
-        await player.load(url + `?codec=${codec}`);
-      } else {
-        throw new Error(`${codec} codec not supported`);
-      }
-    } catch (error) {
-      console.error(`Failed to load ${codec}:`, error);
-      if (codec === 'hvc1') {
-        // Fallback to avc1
-        await loadPlayerWithCodec(url, 'avc1', player);
-      } else if (codec === 'avc1') {
-        // Fallback to vp9
-        await loadPlayerWithCodec(url, 'vp9', player);
-      } else {
-        setError("All codecs failed to load.");
-      }
-    }
-  }
-
-  function isCodecSupported(codec) {
-    const video = document.createElement('video');
-    return video.canPlayType(`video/mp4; codecs="${codec}"`) !== '';
   }
 
   function onErrorEvent(event) {
@@ -146,7 +159,7 @@ const Home = () => {
   return (
     <div style={{ position: "relative", width: "900px", height: "600px", justifySelf: "center" }}>
       <video id="video" playsInline autoPlay muted controls style={{ width: "100%", height: "auto" }} />
-      {error && <div style={{ color: 'red', position: 'absolute', top: '10px', left: '10px' }}>{error}</div>}
+      <div style={{ textAlign: "center" }}>{isAndroidTablet ? "Tablet" : isAndroid ? "Android" : isIOS ? "iOS" : "Device"}</div>
     </div>
   );
 };
