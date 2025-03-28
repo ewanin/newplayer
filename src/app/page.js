@@ -120,7 +120,7 @@ const Home = () => {
 
   return (
     <div style={{ position: "relative", width: "900px", height: "600px", justifySelf: "center" }}>
-      <video id="video" controls style={{ width: "100%", height: "auto" }} />
+      <video id="video" muted autoPlay controls style={{ width: "100%", height: "auto" }} />
     </div>
   );
 };
