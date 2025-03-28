@@ -113,6 +113,7 @@ const Home = () => {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
 
         player.configure({
+          preferredVideoCodecs: supportsH265 ? ['hvc1', 'avc1', 'vp9'] : ['avc1', 'vp9'],
           streaming: {
             bufferingGoal: 10,
             bufferBehind: 10,
