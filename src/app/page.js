@@ -63,7 +63,7 @@ const Home = () => {
         } else {
           drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
           const widevineAdvanced = {
-            videoRobustness: ["SW_SECURE_DECODE"],
+            videoRobustness: ["HW_SECURE_DECODE"],
           };
           player.configure({
             streaming: {
