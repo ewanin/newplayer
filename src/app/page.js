@@ -9,6 +9,7 @@ const Home = () => {
     (/Safari/.test(userAgent) && !/Chrome/.test(userAgent) && !/Edge/.test(userAgent));
   const isChromeMac = /Chrome/.test(userAgent) && /Mac/.test(userAgent);
   const isSafariMac = /Safari/.test(userAgent) && /Mac/.test(userAgent);
+  const isAndroid = /Android/.test(userAgent);
 
   const contentUrl = isIOS || isChromeMac || isSafariMac ?
     "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1647.m3u8" :
@@ -29,7 +30,6 @@ const Home = () => {
   }, [shakaPlayer]);
 
   function initApp() {
-    // Install polyfills for older browsers.
     shakaPlayer.polyfill.installAll();
 
     if (shakaPlayer.Player.isBrowserSupported()) {
@@ -50,10 +50,12 @@ const Home = () => {
     try {
       const drmConfig = {};
 
+      // Modify DRM and player settings for Android devices
       if (isIOS || isChromeMac || isSafariMac) {
         video.muted = true;
         video.autoPlay = true;
         drmConfig["com.apple.fps"] = "https://c8eaeae1-drm-fairplay-licensing.axprod.net/AcquireLicense";
+
         player.configure({
           streaming: {
             useNativeHlsForFairPlay: true,
@@ -77,8 +79,43 @@ const Home = () => {
             },
           },
         });
+      } else if (isAndroid) {
+        drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
+
+        // For Android devices, use custom settings for better performance
+        player.configure({
+          streaming: {
+            bufferingGoal: 10,
+            bufferBehind: 10,
+            rebufferingGoal: 4,
+            lowLatencyMode: false,
+            // Enable aggressive reconnection policy for more stable streaming
+            retryParameters: {
+              maxAttempts: 5,
+              baseDelayMs: 500,
+              backoffFactor: 1.5,
+              timeoutMs: 5000,
+            },
+          },
+          abr: {
+            enabled: true,
+            switchInterval: 6,
+            bandwidthUpgradeTarget: 0.75,
+            bandwidthDowngradeTarget: 0.85,
+          },
+          drm: {
+            servers: drmConfig,
+            advanced: {
+              "com.widevine.alpha": {
+                videoRobustness: ["SW_SECURE_DECODE"], // Ensure software-based decoding
+                audioRobustness: ["SW_SECURE_CRYPTO"],
+              },
+            },
+          },
+        });
       } else {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
+
         player.configure({
           streaming: {
             bufferingGoal: 10,
@@ -120,7 +157,7 @@ const Home = () => {
 
   return (
     <div style={{ position: "relative", width: "900px", height: "600px", justifySelf: "center" }}>
-      <video id="video" muted autoPlay controls style={{ width: "100%", height: "auto" }} />
+      <video id="video" playsInline autoPlay muted controls style={{ width: "100%", height: "auto" }} />
     </div>
   );
 };
