@@ -79,7 +79,10 @@ const Home = () => {
               bandwidthDowngradeTarget: 0.85,
             },
             drm: {
-              servers: drmConfig
+              servers: drmConfig,
+              advanced: {
+                "com.widevine.alpha": widevineAdvanced,
+              },
             },
           });
         }
