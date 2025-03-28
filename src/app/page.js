@@ -89,13 +89,6 @@ const Home = () => {
             bufferBehind: 10,
             rebufferingGoal: 4,
             lowLatencyMode: false,
-            // Enable aggressive reconnection policy for more stable streaming
-            retryParameters: {
-              maxAttempts: 5,
-              baseDelayMs: 500,
-              backoffFactor: 1.5,
-              timeoutMs: 5000,
-            },
           },
           abr: {
             enabled: true,
