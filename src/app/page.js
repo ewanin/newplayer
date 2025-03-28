@@ -62,9 +62,6 @@ const Home = () => {
           });
         } else {
           drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
-          const widevineAdvanced = {
-            videoRobustness: ["HW_SECURE_DECODE"],
-          };
           player.configure({
             streaming: {
               bufferingGoal: 10,
@@ -81,8 +78,11 @@ const Home = () => {
             drm: {
               servers: drmConfig,
               advanced: {
-                "com.widevine.alpha": widevineAdvanced,
-              },
+                'com.widevine.alpha': {
+                  'videoRobustness': ['HW_SECURE_ALL', 'SW_SECURE_CRYPTO'],
+                  'audioRobustness': ['HW_SECURE_ALL', 'SW_SECURE_CRYPTO']
+                }
+              }
             },
           });
         }
