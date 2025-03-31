@@ -65,7 +65,7 @@ const Home = () => {
     }
 
     async function fallbackToVP9IfPresent() {
-      const manifest = await shaka.dash.DashParser.prototype.parseManifest(contentUrl, null);
+      const manifest = await shakaPlayer.dash.DashParser.prototype.parseManifest(contentUrl, null);
       const hasVP9 = manifest.variants.some(v => v.video && v.video.codecs && v.video.codecs.startsWith('vp09'));
 
       if (hasVP9) {
@@ -103,8 +103,8 @@ const Home = () => {
 
     player.addEventListener('error', async function (e) {
       const errorCode = e.detail.code;
-      const isDecodeError = errorCode === shaka.util.Error.Code.DECODE_ERROR ||
-        errorCode === shaka.util.Error.Code.VIDEO_ERROR;
+      const isDecodeError = errorCode === shakaPlayer.util.Error.Code.DECODE_ERROR ||
+        errorCode === shakaPlayer.util.Error.Code.VIDEO_ERROR;
 
       if (isDecodeError) {
         if (!triedVP9) {
