@@ -159,7 +159,7 @@ const Home = () => {
 
   return (
     <div style={{ position: "relative", width: "900px", height: "600px", justifySelf: "center" }}>
-      <video id="video" playsInline autoPlay muted controls style={{ width: "100%", height: "auto" }} />
+      <video id="video" playsInline controls style={{ width: "100%", height: "auto" }} />
       <div style={{ textAlign: "center" }}>{isAndroidTablet ? "Tablet" : isAndroid ? "Android" : isIOS ? "iOS" : "Device"}</div>
     </div>
   );
