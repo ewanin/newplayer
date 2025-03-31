@@ -87,7 +87,7 @@ const Home = () => {
 
         // For Android devices, use custom settings for better performance
         player.configure({
-          preferredVideoCodecs: supportsH265 ? ['avc1', 'avc1', 'avc1'] : ['avc1', 'avc1'],
+          // preferredVideoCodecs: supportsH265 && ['hvc1', 'avc1', 'avc1'],
           streaming: {
             bufferingGoal: 10,
             bufferBehind: 10,
@@ -150,7 +150,16 @@ const Home = () => {
   }
 
   function onError(error) {
-    console.error('Error code', error.code, 'object', error);
+    console.warn(error);
+    // Check for specific video codec-related errors and log them
+    if (error.code === shakaPlayer.error.Code.VIDEO_ERROR) {
+      console.error('Video error occurred:', error);
+    } else if (error.code === shakaPlayer.error.Code.DECODE_ERROR) {
+      console.error('Decode error occurred:', error);
+    } else {
+      // Log other errors
+      console.error('Error code', error.code, 'object', error);
+    }
   }
 
   return (
