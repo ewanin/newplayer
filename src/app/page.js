@@ -144,6 +144,8 @@ const Home = () => {
       });
 
       await player.load(contentUrl);
+      const manifest = await shakaPlayer.dash.DashParser.prototype.parseManifest(contentUrl, null);
+      console.warn(manifest);
     } catch (error) {
       console.error("Error loading player:", error);
     }
