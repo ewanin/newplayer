@@ -151,6 +151,7 @@ const Home = () => {
 
   function onError(error) {
     console.warn("error", error);
+    console.warn("shakaPlayer", shakaPlayer)
     console.warn("shakaPlayer VIDEO_ERROR", shakaPlayer.error.VIDEO_ERROR)
     console.warn("shakaPlayer DECODE_ERROR", shakaPlayer.error.DECODE_ERROR)
     // Check for specific video codec-related errors and log them
