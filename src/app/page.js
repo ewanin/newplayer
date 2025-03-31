@@ -13,8 +13,12 @@ const Home = () => {
   const isAndroidTablet = /Android/.test(userAgent) && !/Mobile/.test(userAgent);
 
   const contentUrl = isIOS || isChromeMac || isSafariMac ?
-    "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1647.m3u8" :
-    "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1646.mpd";
+    "https://travelxp.akamaized.net/67514277f43cd56c4e9942aa/manifest_v2_hd_13122024_1725.m3u8" :
+    "https://travelxp.akamaized.net/67514277f43cd56c4e9942aa/manifest_v2_hd_13122024_1723.mpd";
+
+  // "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1647.m3u8" :
+  // "https://travelxp.akamaized.net/65eb247ae719caba054e56fa/manifest_v1_hd_14032024_1646.mpd";
+
   // "https://travelxp.akamaized.net/676026372b3f6946db2f607d/manifest_v2_hd_12032025_1111.m3u8" :
   // "https://travelxp.akamaized.net/676026372b3f6946db2f607d/manifest_v2_hd_12032025_1109.mpd";
 
@@ -87,9 +91,8 @@ const Home = () => {
       } else if (isAndroid) {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
 
-        // For Android devices, use custom settings for better performance
         player.configure({
-          preferredVideoCodecs: supportsH265 ? ['vp9', 'vp9', 'vp9'] : ['vp9', 'vp9'],
+          preferredVideoCodecs: supportsH265 ? ['hvc1', 'avc1', 'vp9'] : ['avc1', 'vp9'],
           streaming: {
             bufferingGoal: 10,
             bufferBehind: 10,
@@ -102,15 +105,7 @@ const Home = () => {
             bandwidthUpgradeTarget: 0.75,
             bandwidthDowngradeTarget: 0.85,
           },
-          drm: {
-            servers: drmConfig,
-            advanced: {
-              "com.widevine.alpha": {
-                videoRobustness: ["SW_SECURE_DECODE"], // Ensure software-based decoding
-                audioRobustness: ["SW_SECURE_CRYPTO"],
-              },
-            },
-          },
+          drm: { servers: drmConfig, },
         });
       } else {
         drmConfig["com.widevine.alpha"] = "https://c8eaeae1-drm-widevine-licensing.axprod.net/AcquireLicense";
@@ -137,7 +132,10 @@ const Home = () => {
 
       player.getNetworkingEngine().registerRequestFilter(function (type, request) {
         if (type === shakaPlayer.net.NetworkingEngine.RequestType.LICENSE) {
-          request.headers['X-AxDRM-Message'] = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjQ1ODc2N2QtYTgzYi00MWQ0LWFlNjgtYWNhNzAwZDNkODRmIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImxpY2Vuc2UiOnsiZXhwaXJhdGlvbl9kYXRldGltZSI6IjIwMjUtMDMtMjlUMTE6MzA6MDcuNDAxWiIsImFsbG93X3BlcnNpc3RlbmNlIjp0cnVlLCJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImNvbnRlbnRfa2V5X3VzYWdlX3BvbGljaWVzIjpbeyJuYW1lIjoiUG9saWN5IEEiLCJ3aWRldmluZSI6eyJkZXZpY2Vfc2VjdXJpdHlfbGV2ZWwiOiJTV19TRUNVUkVfQ1JZUFRPIn19XSwiY29udGVudF9rZXlzX3NvdXJjZSI6eyJpbmxpbmUiOlt7ImlkIjoiMDJlM2FhNzg4M2IyOWI4OGEwZDM1ZTU4ODkyMDUxMDciLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9LHsiaWQiOiI3ZmUzMmY0MjZjMjE3MTliNTQxNTg5MWY2MjU2NzhkYSIsInVzYWdlX3BvbGljeSI6IlBvbGljeSBBIn0seyJpZCI6IjA4MmUxOWQzOTU5NmYwZWUzZDk5NzliOGQ0NjI2M2JiIiwidXNhZ2VfcG9saWN5IjoiUG9saWN5IEEifV19fSwiaWF0IjoxNzQzMTY1MDA3LCJleHAiOjE3NDMyNTE0MDd9.ekNJT6TwxTMYE5x4dHRvsv5sTdkelpmg-xqwfYxyfRI";
+          request.headers['X-AxDRM-Message'] = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjQ1ODc2N2QtYTgzYi00MWQ0LWFlNjgtYWNhNzAwZDNkODRmIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImxpY2Vuc2UiOnsiZXhwaXJhdGlvbl9kYXRldGltZSI6IjIwMjUtMDQtMDFUMDY6MDA6NTUuNTQyWiIsImFsbG93X3BlcnNpc3RlbmNlIjp0cnVlLCJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImNvbnRlbnRfa2V5X3VzYWdlX3BvbGljaWVzIjpbeyJuYW1lIjoiUG9saWN5IEEiLCJ3aWRldmluZSI6eyJkZXZpY2Vfc2VjdXJpdHlfbGV2ZWwiOiJTV19TRUNVUkVfQ1JZUFRPIn19XSwiY29udGVudF9rZXlzX3NvdXJjZSI6eyJpbmxpbmUiOlt7ImlkIjoiMGExZmM2NWIxNzg5ZDI0ODE2MTcxN2Y4MWZmN2Y1MjkiLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9LHsiaWQiOiIzZWE3ZmIwNmUzNmQ4OTE5ZTI0ZDE0NGE0ZGE5NjY4ZCIsInVzYWdlX3BvbGljeSI6IlBvbGljeSBBIn0seyJpZCI6IjU5MDQwZjFhODhiZTQ3ODllNzA4NmI4YmM5NTQ3M2ZhIiwidXNhZ2VfcG9saWN5IjoiUG9saWN5IEEifSx7ImlkIjoiMTYzYTRlZDdiZDE0MTI0MzJlNmJlOGYwMzY5M2RiOWIiLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9XX19LCJpYXQiOjE3NDM0MDQ0NTUsImV4cCI6MTc0MzQ5MDg1NX0.bYHhuhJfVyvWqa1QEfbPLHIHM89JJ2ojIQ6xwdPjaqY";
+
+          // request.headers['X-AxDRM-Message'] = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjQ1ODc2N2QtYTgzYi00MWQ0LWFlNjgtYWNhNzAwZDNkODRmIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImxpY2Vuc2UiOnsiZXhwaXJhdGlvbl9kYXRldGltZSI6IjIwMjUtMDMtMjlUMTE6MzA6MDcuNDAxWiIsImFsbG93X3BlcnNpc3RlbmNlIjp0cnVlLCJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImNvbnRlbnRfa2V5X3VzYWdlX3BvbGljaWVzIjpbeyJuYW1lIjoiUG9saWN5IEEiLCJ3aWRldmluZSI6eyJkZXZpY2Vfc2VjdXJpdHlfbGV2ZWwiOiJTV19TRUNVUkVfQ1JZUFRPIn19XSwiY29udGVudF9rZXlzX3NvdXJjZSI6eyJpbmxpbmUiOlt7ImlkIjoiMDJlM2FhNzg4M2IyOWI4OGEwZDM1ZTU4ODkyMDUxMDciLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9LHsiaWQiOiI3ZmUzMmY0MjZjMjE3MTliNTQxNTg5MWY2MjU2NzhkYSIsInVzYWdlX3BvbGljeSI6IlBvbGljeSBBIn0seyJpZCI6IjA4MmUxOWQzOTU5NmYwZWUzZDk5NzliOGQ0NjI2M2JiIiwidXNhZ2VfcG9saWN5IjoiUG9saWN5IEEifV19fSwiaWF0IjoxNzQzMTY1MDA3LCJleHAiOjE3NDMyNTE0MDd9.ekNJT6TwxTMYE5x4dHRvsv5sTdkelpmg-xqwfYxyfRI";
+
           // request.headers['X-AxDRM-Message'] = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjQ1ODc2N2QtYTgzYi00MWQ0LWFlNjgtYWNhNzAwZDNkODRmIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjIsImxpY2Vuc2UiOnsiZXhwaXJhdGlvbl9kYXRldGltZSI6IjIwMjUtMDMtMjlUMTM6NDY6NDUuNzM4WiIsImFsbG93X3BlcnNpc3RlbmNlIjp0cnVlLCJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImNvbnRlbnRfa2V5X3VzYWdlX3BvbGljaWVzIjpbeyJuYW1lIjoiUG9saWN5IEEiLCJ3aWRldmluZSI6eyJkZXZpY2Vfc2VjdXJpdHlfbGV2ZWwiOiJTV19TRUNVUkVfQ1JZUFRPIn19XSwiY29udGVudF9rZXlzX3NvdXJjZSI6eyJpbmxpbmUiOlt7ImlkIjoiYmJkZjFmYWVlZmE5ODRjNjNhZjVkNmYzYzA1MDQwMDkiLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9LHsiaWQiOiJhMzAzYzM1NzRiMTIzYmZlZGM3YWEyZmZkNmY1M2JmMSIsInVzYWdlX3BvbGljeSI6IlBvbGljeSBBIn0seyJpZCI6ImI0ZTU0MjVjM2NhYjc4NTE0MTgwZDQ2MTA3NzBkNmJkIiwidXNhZ2VfcG9saWN5IjoiUG9saWN5IEEifSx7ImlkIjoiZTdkMjQ0NzI1MGQ5YmE0MmE0MzIzNzRmODU3ZjJhYzgiLCJ1c2FnZV9wb2xpY3kiOiJQb2xpY3kgQSJ9XX19LCJpYXQiOjE3NDMxNzMyMDUsImV4cCI6MTc0MzI1OTYwNX0.7j0W9pt-zBFTws56ysFSMICYjUo2RZPqjG4EBCAFE2M";
         }
       });
