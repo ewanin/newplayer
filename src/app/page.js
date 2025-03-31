@@ -151,16 +151,17 @@ const Home = () => {
 
   function onError(error) {
     console.warn("error", error);
-    console.warn("shakaPlayer", shakaPlayer.error)
+    console.warn("shakaPlayer VIDEO_ERROR", shakaPlayer.error.VIDEO_ERROR)
+    console.warn("shakaPlayer DECODE_ERROR", shakaPlayer.error.DECODE_ERROR)
     // Check for specific video codec-related errors and log them
-    if (error.code === shakaPlayer.error.Code.VIDEO_ERROR) {
-      console.error('Video error occurred:', error);
-    } else if (error.code === shakaPlayer.error.Code.DECODE_ERROR) {
-      console.error('Decode error occurred:', error);
-    } else {
-      // Log other errors
-      console.error('Error code', error.code, 'object', error);
-    }
+    // if (error.code === shakaPlayer.error.Code.VIDEO_ERROR) {
+    //   console.error('Video error occurred:', error);
+    // } else if (error.code === shakaPlayer.error.Code.DECODE_ERROR) {
+    //   console.error('Decode error occurred:', error);
+    // } else {
+    //   // Log other errors
+    //   console.error('Error code', error.code, 'object', error);
+    // }
   }
 
   return (
