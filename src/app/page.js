@@ -87,7 +87,7 @@ const Home = () => {
 
         // For Android devices, use custom settings for better performance
         player.configure({
-          // preferredVideoCodecs: supportsH265 ? ['vp9', 'vp9', 'vp9'] : ['vp9', 'vp9'],
+          preferredVideoCodecs: supportsH265 ? ['avc1', 'avc1', 'avc1'] : ['avc1', 'avc1'],
           streaming: {
             bufferingGoal: 10,
             bufferBehind: 10,
